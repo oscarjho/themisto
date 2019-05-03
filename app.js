@@ -1,16 +1,15 @@
-// Bring Express
 const express = require('express');
-// Bring Body Parser
 const bodyParser = require('body-parser');
-// Bring Axios
 const axios = require('axios');
-// Bring puppeteer
 const puppeteer = require('puppeteer');
+
 //Init app
 const app = express();
+
 // Body parser middleware
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+
 // Set port
 const port = process.env.PORT || 3000;
 //Start Server
@@ -19,7 +18,7 @@ app.listen(port, () => console.log(`Server running on port ${port}`));
 // @route   GET /
 // @desc    / 
 // @access  Public
-router.get('/', (req, res) => res.json({ msg: 'themisto' }));
+app.get('/', (req, res) => res.json({ msg: 'themisto' }));
 
 
 
