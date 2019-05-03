@@ -20,8 +20,6 @@ app.listen(port, () => console.log(`Server running on port ${port}`));
 // @access  Public
 app.get('/', (req, res) => res.json({ msg: 'themisto' }));
 
-
-
 //Route
 app.post('/search', function(req, res) {
   
