@@ -16,6 +16,13 @@ const port = process.env.PORT || 3000;
 //Start Server
 app.listen(port, () => console.log(`Server running on port ${port}`));
 
+// @route   GET /
+// @desc    / 
+// @access  Public
+router.get('/', (req, res) => res.json({ msg: 'themisto' }));
+
+
+
 //Route
 app.post('/search', function(req, res) {
   
@@ -26,7 +33,7 @@ app.post('/search', function(req, res) {
       query: req.body.searchdata.query,
       provider: req.body.searchdata.provider,
       options: {user: req.body.searchdata.options.user, password: req.body.searchdata.options.password},
-      callbackurl: `http://localhost:5000/api/product/search-order/${req.body._id}`
+      callbackurl: `https://ganymede2.herokuapp.com/api/product/search-order/${req.body._id}`
     },
     orderstatus: "processing",
     productresult: {}
@@ -90,7 +97,7 @@ const search = (req) => {
   
     //Send the result
     axios
-      .post('http://localhost:5000/api/product/save-search', send)
+      .post('https://ganymede2.herokuapp.com/api/product/save-search', send)
       .then(res => console.log('axios send'))
       .catch(err => console.log(err));
 
