@@ -47,7 +47,14 @@ const search = (req) => {
   const query = req.searchdata.query;
   (async () => {
     /* Initiate the Puppeteer browser */
-    const browser = await puppeteer.launch({ headless: true });
+    const browser = await puppeteer.launch({ 
+      headless: true,
+      'args' : [
+        '--no-sandbox',
+        '--disable-setuid-sandbox'
+      ]
+    });
+
     const page = await browser.newPage();
     /* Go to the IMDB Movie page and wait for it to load */
     await page.goto(
