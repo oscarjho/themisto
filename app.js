@@ -22,7 +22,7 @@ app.get('/', (req, res) => res.json({ msg: 'themisto' }));
 
 //Route
 app.post('/search', function(req, res) {
-  
+
   // Get query on get.body
   const searchorder = {
     _id: req.body._id,
@@ -36,9 +36,7 @@ app.post('/search', function(req, res) {
     productresult: {}
   };
 
-
   res.json(searchorder);
-
 
   search(searchorder);
 });
