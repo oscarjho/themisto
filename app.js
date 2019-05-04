@@ -90,6 +90,7 @@ const search = (req) => {
         })
 
       return removeObsoletesArray;
+      
       });
 
     console.log(result);
