@@ -59,8 +59,6 @@ const search = (req) => {
       `https://listado.mercadolibre.com.ve/${query}`,
       { waitUntil: 'networkidle2' });
 
-    page.once('load', () => console.log('Process Finished'));
-
     var result = await page.evaluate(() => {
       // Set the products
       let productos=[];
@@ -83,10 +81,8 @@ const search = (req) => {
       });
 
       return productos;
-      
-      });
 
-    console.log(result);
+      });
 
     //Object with the result
     let send = {
@@ -96,7 +92,6 @@ const search = (req) => {
       productresult: result
     }
     
-    console.log('ahora axios');
   
     //Send the result
     axios
