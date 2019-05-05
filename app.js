@@ -82,14 +82,7 @@ const search = (req) => {
         productos.push(productJson);
       });
 
-      let removeObsoletesArray = []
-        productos.forEach( element => {
-          if(element.length > 0){
-              removeObsoletesArray.push(element)
-          }
-        })
-
-      return removeObsoletesArray;
+      return productos;
       
       });
 
