@@ -2,6 +2,10 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const axios = require('axios');
 const puppeteer = require('puppeteer');
+const users = require('./users');
+
+// Load Validation
+const validatepost = require('./validation/validatepost');
 
 //Init app
 const app = express();
@@ -22,23 +26,43 @@ app.get('/', (req, res) => res.json({ msg: 'themisto' }));
 
 //Route
 app.post('/search', function(req, res) {
-  // Get query on get.body
-  const searchorder = {
-    _id: req.body._id,
-    searchdata: {
-      query: req.body.searchdata.query,
-      provider: req.body.searchdata.provider,
-      options: {user: req.body.searchdata.options.user, password: req.body.searchdata.options.password},
-      callbackurl: req.body.searchdata.callbackurl,
-    },
-    orderstatus: "processing"
-  };
 
-  res.json(searchorder);
-  console.log(searchorder);
-  console.log('ahora puppeteer');
+  const { errors, isValid } = validatepost(req.body);
 
-  search(searchorder);
+  // Check Validation
+  if (!isValid) {
+    return res.status(400).json(errors);
+  }
+
+  let u = req.body.searchdata.options.user;
+  let p = req.body.searchdata.options.password;
+
+  if (!users.some( el => el.user === u && el.password === p)) {
+    errors.options="Wrong user or password.";
+    res.json(errors);
+  } else {
+    // If the user and password exists and match
+
+    // Get query on get.body
+    const searchorder = {
+      _id: req.body._id,
+      searchdata: {
+        query: req.body.searchdata.query,
+        provider: req.body.searchdata.provider,
+        options: {user: req.body.searchdata.options.user, password: req.body.searchdata.options.password},
+        callbackurl: req.body.searchdata.callbackurl,
+      },
+      orderstatus: "processing"
+    };
+
+    res.json(searchorder);
+    console.log(searchorder);
+    console.log('ahora puppeteer');
+
+    search(searchorder);
+
+  }
+  
 });
 
 
@@ -61,9 +85,16 @@ const search = (req) => {
       `https://listado.mercadolibre.com.ve/${query}`,
       { waitUntil: 'networkidle2' });
 
-    const urls = await page.evaluate(() => Array.from(document.querySelectorAll('.item__info-title'), element => element.href));
+    console.log(query);
 
-    if (urls.length > 0 ) {
+    const rev = await page.evaluate(() => 
+      document.querySelectorAll('.item__info-title').length
+    );
+
+    if (rev > 0) {
+
+      const urls = await page.evaluate(() => Array.from(document.querySelectorAll('.item__info-title'), element => element.href));
+
       var data = [];
       // for (let i = 0, total_urls = urls.length; i < total_urls; i++)
       for (let i = 0; i < 2; i++) {
@@ -93,27 +124,40 @@ const search = (req) => {
       
         data.push(result);
       } //Close result bucle when done
+
+      console.log(data);
+
+      //Object with the result
+      let send = {
+        _id: req._id,
+        searchdata: req.searchdata,
+        productresult: data
+      }
+
+      //Send the result
+      axios
+        .post(req.searchdata.callbackurl, send)
+        .then(res => console.log('axios send', req.searchdata.callbackurl))
+        .catch(err => console.log(err));
+
+      await browser.close();
+
     } else {
-      let data = {}
+      // If we dont found any URL to show
+      // Object with the result
+      let send = {
+        _id: req._id,
+        searchdata: req.searchdata
+      }
+
+      //Send the result
+      axios
+        .post(req.searchdata.callbackurl, send)
+        .then(res => console.log('axios send', req.searchdata.callbackurl))
+        .catch(err => console.log(err));
+
+      await browser.close();
     }
-
-    console.log(data);
-
-    //Object with the result
-    let send = {
-      _id: req._id,
-      searchdata: req.searchdata,
-      orderstatus: "fullfilled",
-      productresult: data
-    }
-
-    //Send the result
-    axios
-      .post(req.searchdata.callbackurl, send)
-      .then(res => console.log('axios send', req.searchdata.callbackurl))
-      .catch(err => console.log(err));
-
-    await browser.close();
 
   })(); //Close async
 }// Close Search
